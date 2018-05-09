@@ -78,4 +78,9 @@ router.post('/login', (req, res, next) => {
     .catch(next);
 });
 
+router.post('/logout', (req, res) => {
+  req.session.currentUser = null;
+  return res.status(204).send();
+});
+
 module.exports = router;
