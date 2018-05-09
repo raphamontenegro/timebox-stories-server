@@ -26,8 +26,6 @@ const storySchema = new Schema({
   }
 });
 
-storySchema.index({ location: '2dsphere' });
-
 const Story = mongoose.model('Story', storySchema);
 
 module.exports = Story;

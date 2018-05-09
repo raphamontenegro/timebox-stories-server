@@ -9,8 +9,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const index = require('./routes/index');
 
 const app = express();
 
@@ -21,7 +20,17 @@ mongoose.connect('mongodb://localhost/timeBox', {
   reconnectTries: Number.MAX_VALUE
 });
 
+// Middleware
+
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:4200']
+  })
+);
+
 // Session
+
 app.use(
   session({
     store: new MongoStore({
@@ -37,39 +46,25 @@ app.use(
   })
 );
 
-// Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/', index);
 
-app.use(
-  cors({
-    credentials: true,
-    origin: ['http://localhost:4200']
-  })
-);
-
-// -- 404 and error handler
-
-// NOTE: requires a views/not-found.ejs template
+// catch 404 and forward to error handler
 app.use((req, res, next) => {
-  res.status(404);
-  res.render('not-found');
+  res.status(404).json({ code: 'not found' });
 });
 
-// NOTE: requires a views/error.ejs template
 app.use((err, req, res, next) => {
   // always log the error
   console.error('ERROR', req.method, req.path, err);
 
   // only render if the error ocurred before sending the response
   if (!res.headersSent) {
-    res.status(500);
-    res.render('error');
+    res.status(500).json({ code: 'unexpected' });
   }
 });
 
