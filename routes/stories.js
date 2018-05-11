@@ -6,11 +6,8 @@ const router = express.Router();
 const Stories = require('../models/story');
 
 /* GET home page. */
-router.get('/', (req, res, next) => {
-  res.status(200).json({ title: 'Welcome to timeBox server' });
-});
 
-router.get('/stories', (req, res, next) => {
+router.get('/', (req, res, next) => {
   const query = req.query.time;
   Stories.find({length: query})
     .then(result => {
@@ -18,4 +15,5 @@ router.get('/stories', (req, res, next) => {
     })
     .catch(next);
 });
+
 module.exports = router;

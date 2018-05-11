@@ -2,7 +2,6 @@
 
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
@@ -11,6 +10,7 @@ const MongoStore = require('connect-mongo')(session);
 
 const index = require('./routes/index');
 const auth = require('./routes/auth');
+const stories = require('./routes/stories');
 
 const app = express();
 
@@ -54,6 +54,7 @@ app.use(cookieParser());
 
 app.use('/', index);
 app.use('/auth', auth);
+app.use('/stories', stories);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

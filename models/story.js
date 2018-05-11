@@ -14,7 +14,7 @@ const storySchema = new Schema({
     required: true
   },
   length: {
-    type: String,
+    type: Number,
     required: true
   },
   read: {
