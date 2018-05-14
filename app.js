@@ -47,21 +47,21 @@ passport.use(new LocalStrategy(
   }
 ));
 
-// const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
+const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
 
-// const pocketStrategy = new PocketStrategy({
-//   consumerKey: POCKET_CONSUMER_KEY,
-//   callbackURL: 'http://localhost:3000/auth/pocket/callback'
-// }, function (username, accessToken, done) {
-//   process.nextTick(function () {
-//     return done(null, {
-//       username: username,
-//       accessToken: accessToken
-//     });
-//   });
-// }
-// );
-// passport.use(pocketStrategy);
+const pocketStrategy = new PocketStrategy({
+  consumerKey: POCKET_CONSUMER_KEY,
+  callbackURL: 'http://localhost:3000/auth/pocket/callback'
+}, function (username, accessToken, done) {
+  process.nextTick(function () {
+    return done(null, {
+      username: username,
+      accessToken: accessToken
+    });
+  });
+}
+);
+passport.use(pocketStrategy);
 
 // Passport Set serializers
 passport.serializeUser(function (user, done) {
