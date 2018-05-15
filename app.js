@@ -90,11 +90,12 @@ const options = {
   callbackURL: 'http://localhost:3000/auth/pocket/callback' // http changed
 };
 const pocketStrategy = new PocketStrategy(options, (username, accessToken, done) => {
-  User.findOne({ pocketUsername: username }, (err, user) => {
+  User.findOne({ email: decodeURIComponent(username) }, (err, user) => {
     if (err) {
       return done(err);
     }
     if (user) {
+      user.pocketToken = accessToken;
       return done(null, user);
     }
 
