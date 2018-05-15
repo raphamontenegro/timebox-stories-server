@@ -2,27 +2,12 @@
 
 const express = require('express');
 const bcrypt = require('bcrypt');
-const request = require('request');
 const passport = require('passport');
 
 const router = express.Router();
 
+const pocketClient = require('../clients/pocket');
 const User = require('../models/user');
-
-const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
-
-const formDataToJson = function (formData) {
-  const json = {};
-
-  formData.split('&').forEach(function (item) {
-    const itemKey = item.split('=')[0];
-    const itemValue = item.split('=')[1];
-
-    json[itemKey] = itemValue;
-  });
-
-  return json;
-};
 
 router.get('/me', (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -88,41 +73,48 @@ router.post('/login', (req, res, next) => {
 });
 
 router.post('/logout', (req, res) => {
+  delete req.session.pocketCode;
+  delete req.session.pocketData;
   req.logout();
   return res.status(204).json({ code: 'ok' });
 });
 
 // ---------------- Passport authorizations ----------------//
 
+// @note invoke by angular authService.loginPocket() expects a url bacl
 router.get('/pocket', (req, res, next) => {
-  const callbackURL = 'localhost:3000/auth/pocket/callback';
-
-  request.post({
-    'headers': { 'content-type': 'application/x-www-form-urlencoded' },
-    'url': 'https://getpocket.com/v3/oauth/request',
-    'form': {
-      'consumer_key': POCKET_CONSUMER_KEY,
-      'redirect_uri': callbackURL
-    }
-  }, function (error, response, body) {
-    if (error) { next(error); }
-
-    const data = formDataToJson(body);
-    const url = `https://getpocket.com/auth/authorize?request_token=${data.code}&redirect_uri=${callbackURL}`;
-
-    res.status(200).json({ url });
-  });
+  pocketClient.getRequestUrl()
+    .then((url) => {
+      res.status(200).json({ url });
+    })
+    .catch(next);
 });
 
 // @note special route: this is the OAuth callback so it needs to respond with a redirect back to our frontend
 router.get('/pocket/callback', (req, res, next) => {
-  passport.authenticate('pocket', (error, user, info) => {
-    if (error) {
-      console.log(error);
-      return res.redirect('http://localhost:4200/login');
+  req.isPocketCallback = true;
+  var fn = passport.authenticate('pocket', (err, user) => {
+    if (err) {
+      console.error('/pocket/callback after login', err);
+      return res.redirect('http://localhost:4200/login?error=authenticate');
     }
-    res.redirect('http://localhost:4200/stories');
+    req.login(user, (err) => {
+      if (err) {
+        console.error('/pocket/callback after login', err);
+        return res.redirect('http://localhost:4200/login?error=login');
+      }
+      res.redirect('http://localhost:4200/stories');
+    });
   });
+
+  fn(req, res, next);
+});
+
+router.get('/pocket/callback', (req, res, next) => {
+  delete req.session.pocketCode;
+  delete req.session.pocketData;
+  console.error('/pocket/callback code reuse');
+  return res.redirect('http://localhost:4200/login?error=code');
 });
 
 module.exports = router;

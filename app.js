@@ -28,6 +28,20 @@ mongoose.connect('mongodb://localhost/timeBox', {
   reconnectTries: Number.MAX_VALUE
 });
 
+// Middleware
+
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:4200']
+  })
+);
+
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
 // ----------------- Session --------------------//
 
 app.use(
@@ -85,12 +99,15 @@ const pocketStrategy = new PocketStrategy(options, (username, accessToken, done)
     }
 
     const newUser = new User({
-      pocketUsername: username,
+      username: decodeURIComponent(username),
+      email: decodeURIComponent(username),
+      pocketUsername: decodeURIComponent(username),
       pocketToken: accessToken
     });
 
     newUser.save(err => {
       if (err) {
+        console.error(err);
         return done(err);
       }
       done(null, newUser);
@@ -101,20 +118,6 @@ passport.use(pocketStrategy);
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Middleware
-
-app.use(
-  cors({
-    credentials: true,
-    origin: ['http://localhost:4200']
-  })
-);
-
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 app.use('/', index);
 app.use('/auth', auth);
@@ -131,6 +134,13 @@ app.use((err, req, res, next) => {
 
   // only render if the error ocurred before sending the response
   if (!res.headersSent) {
+    if (req.isPocketCallback) {
+      delete req.session.pocketCode;
+      delete req.session.pocketData;
+      console.error('/pocket/callback global error handler', err);
+      return res.redirect('http://localhost:4200/login?error=unexpected');
+    }
+
     res.status(500).json({ code: 'unexpected' });
   }
 });

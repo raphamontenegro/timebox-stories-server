@@ -14,10 +14,10 @@ const userSchema = new Schema({
     unique: true
   },
   password: {
-    type: String,
-    required: true
+    type: String
   },
-  pockedId: String
+  pocketUsername: String,
+  pocketToken: String
 });
 
 const User = mongoose.model('User', userSchema);
