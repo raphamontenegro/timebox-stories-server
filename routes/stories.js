@@ -18,6 +18,14 @@ router.get('/', (req, res, next) => {
     .catch(next);
 });
 
+router.get('/:id/read', (req, res, next) => {
+  Stories.findById(req.params.id)
+    .then((result) => {
+      res.json(result);
+    })
+    .catch(next);
+});
+
 router.get('/pocket', (req, res, next) => {
   if (req.user) {
     pocketClient.getAllStories(req.user.pocketToken)
