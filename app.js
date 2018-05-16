@@ -96,6 +96,7 @@ const pocketStrategy = new PocketStrategy(options, (username, accessToken, done)
     }
     if (user) {
       user.pocketToken = accessToken;
+      user.save();
       return done(null, user);
     }
 

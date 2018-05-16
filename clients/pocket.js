@@ -56,7 +56,50 @@ const anotherOne = (user) => {
   });
 };
 
+const getAllStories = (accessToken) => {
+  return new Promise(function (resolve, reject) {
+    const options = {
+      'headers': {
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+      'url': 'https://getpocket.com/v3/get',
+      'form': {
+        'consumer_key': POCKET_CONSUMER_KEY,
+        'access_token': accessToken
+      }
+    };
+    request.post(options, (err, response, body) => {
+      if (err) {
+        reject(err);
+      } else {
+        const data = formDataToJson(body);
+        resolve(data);
+      }
+    });
+  });
+};
+
+// getUnreadItems = function (accessToken, callback) {
+//   var strategy = this;
+//   request.post({
+//     'headers': { 'content-type': 'application/x-www-form-urlencoded' },
+//     'url': strategy._options.retrive,
+//     'form': {
+//       'consumer_key': strategy._options.consumerKey,
+//       'access_token': accessToken,
+//       'state': 'unread'
+//     }
+//   }, function (error, response, body) {
+//     if (body) {
+//       var data = JSON.parse(body);
+//     }
+
+//     callback(error, data);
+//   });
+// };
+
 module.exports = {
   getRequestUrl,
-  anotherOne
+  anotherOne,
+  getAllStories
 };
