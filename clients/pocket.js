@@ -14,7 +14,7 @@ const formDataToJson = function (formData) {
 };
 
 // @todo const callbackURL = `${process.env.API_URL}auth/pocket/callback`;
-const callbackURL = 'http://localhost:3000/auth/pocket/callback';
+const callbackURL = process.env.POCKET_CALLBACK_URL;
 // @todo POCKET_CONSUMER_KEY = process.env.POCKET_CONSUMER_KEY,
 const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
 
@@ -26,7 +26,7 @@ const getRequestUrl = () => {
       },
       'url': 'https://getpocket.com/v3/oauth/request',
       'form': {
-        'consumer_key': POCKET_CONSUMER_KEY,
+        'consumer_key': process.env.POCKET_CONSUMER_KEY,
         'redirect_uri': callbackURL
       }
     };
@@ -78,25 +78,6 @@ const getAllStories = (accessToken) => {
     });
   });
 };
-
-// getUnreadItems = function (accessToken, callback) {
-//   var strategy = this;
-//   request.post({
-//     'headers': { 'content-type': 'application/x-www-form-urlencoded' },
-//     'url': strategy._options.retrive,
-//     'form': {
-//       'consumer_key': strategy._options.consumerKey,
-//       'access_token': accessToken,
-//       'state': 'unread'
-//     }
-//   }, function (error, response, body) {
-//     if (body) {
-//       var data = JSON.parse(body);
-//     }
-
-//     callback(error, data);
-//   });
-// };
 
 module.exports = {
   getRequestUrl,

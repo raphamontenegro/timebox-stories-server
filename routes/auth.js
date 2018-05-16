@@ -96,14 +96,14 @@ router.get('/pocket/callback', (req, res, next) => {
   var fn = passport.authenticate('pocket', (err, user) => {
     if (err) {
       console.error('/pocket/callback after login', err);
-      return res.redirect('http://localhost:4200/login?error=authenticate');
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=authenticate`);
     }
     req.login(user, (err) => {
       if (err) {
         console.error('/pocket/callback after login', err);
-        return res.redirect('http://localhost:4200/login?error=login');
+        return res.redirect(`${process.env.CLIENT_URL}/login?error=login`);
       }
-      res.redirect('http://localhost:4200/stories');
+      res.redirect(`${process.env.CLIENT_URL}/stories`);
     });
   });
 
@@ -114,7 +114,7 @@ router.get('/pocket/callback', (req, res, next) => {
   delete req.session.pocketCode;
   delete req.session.pocketData;
   console.error('/pocket/callback code reuse');
-  return res.redirect('http://localhost:4200/login?error=code');
+  return res.redirect(`${process.env.CLIENT_URL}/login?error=code`);
 });
 
 module.exports = router;

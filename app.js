@@ -12,6 +12,7 @@ const bcrypt = require('bcrypt');
 const PocketStrategy = require('passport-pocket');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+require('dotenv').config();
 
 const index = require('./routes/index');
 const auth = require('./routes/auth');
@@ -23,7 +24,7 @@ const app = express();
 
 // ----------------- Mongooose --------------------//
 mongoose.Promise = Promise;
-mongoose.connect('mongodb://localhost/timeBox', {
+mongoose.connect(process.env.MONGODB_URI, {
   keepAlive: true,
   reconnectTries: Number.MAX_VALUE
 });
@@ -33,7 +34,7 @@ mongoose.connect('mongodb://localhost/timeBox', {
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:4200']
+    origin: [process.env.CLIENT_URL]
   })
 );
 
@@ -83,11 +84,9 @@ passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 
-const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
-
 const options = {
-  consumerKey: POCKET_CONSUMER_KEY,
-  callbackURL: 'http://localhost:3000/auth/pocket/callback' // http changed
+  consumerKey: process.env.POCKET_CONSUMER_KEY,
+  callbackURL: process.env.POCKET_CALLBACK_URL
 };
 const pocketStrategy = new PocketStrategy(options, (username, accessToken, done) => {
   User.findOne({ email: decodeURIComponent(username) }, (err, user) => {
@@ -140,7 +139,7 @@ app.use((err, req, res, next) => {
       delete req.session.pocketCode;
       delete req.session.pocketData;
       console.error('/pocket/callback global error handler', err);
-      return res.redirect('http://localhost:4200/login?error=unexpected');
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=unexpected`);
     }
 
     res.status(500).json({ code: 'unexpected' });
