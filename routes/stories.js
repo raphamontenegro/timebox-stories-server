@@ -18,22 +18,24 @@ router.get('/', (req, res, next) => {
     .catch(next);
 });
 
+router.get('/pocket', (req, res, next) => {
+  if (req.user) {
+    const query = req.query.time;
+    pocketClient.getAllStories(req.user.pocketToken, query)
+      .then((data) => {
+        console.log(data);
+        res.status(200).json(data);
+      })
+      .catch(next);
+  }
+});
+
 router.get('/:id/read', (req, res, next) => {
   Stories.findById(req.params.id)
     .then((result) => {
       res.json(result);
     })
     .catch(next);
-});
-
-router.get('/pocket', (req, res, next) => {
-  if (req.user) {
-    pocketClient.getAllStories(req.user.pocketToken)
-      .then((data) => {
-        res.status(200).json({ data });
-      })
-      .catch(next);
-  }
 });
 
 // server.get('/', function (req, res) {

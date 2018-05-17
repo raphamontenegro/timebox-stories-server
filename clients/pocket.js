@@ -1,4 +1,7 @@
 const request = require('request');
+const Diffbot = require('diffbot').Diffbot;
+
+const diffbot = new Diffbot('b28b03abe2552b644475048c9cccdf12'); // your API key here
 
 const formDataToJson = function (formData) {
   const json = {};
@@ -56,7 +59,21 @@ const anotherOne = (user) => {
   });
 };
 
-const getAllStories = (accessToken) => {
+const _filter = (parentObj, time) => {
+  const keys = Object.keys(parentObj);
+  const result = [];
+
+  for (var i = 0; i < keys.length; i++) {
+    let val = parentObj[keys[i]];
+    if (time - 5 < Number(val.word_count) / 230 && val.word_count / 230 <= time) {
+      result.push(val);
+    };
+  }
+
+  return result;
+};
+
+const getAllStories = (accessToken, time) => {
   return new Promise(function (resolve, reject) {
     const options = {
       'headers': {
@@ -72,8 +89,35 @@ const getAllStories = (accessToken) => {
       if (err) {
         reject(err);
       } else {
-        const data = formDataToJson(body);
-        resolve(data);
+        // const data = formDataToJson(body);
+        const data = JSON.parse(body);
+
+        const listOfArticles = _filter(data.list, time);
+        const promiseArray = [];
+
+        for (let index = 0; index < listOfArticles.length; index++) {
+          promiseArray.push(new Promise((resolve, reject) => {
+            diffbot.article({
+              uri: listOfArticles[index].resolved_url
+            },
+            function (err, response) {
+              if (err) {
+                reject(err);
+              } ;
+              let title = response.objects[0].title;
+              let text = response.objects[0].text;
+              if (response) {
+                resolve(JSON.stringify(response.objects[0]));
+              }
+              // console.log(data);
+            });
+          })
+          );
+        }
+
+        Promise.all(promiseArray).then(function (values) {
+          resolve(values);
+        });
       }
     });
   });
