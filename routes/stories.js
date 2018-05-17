@@ -18,9 +18,9 @@ router.get('/', (req, res, next) => {
     .catch(next);
 });
 
-router.get('/pocket', (req, res, next) => {
+router.get('/pocket/:time', (req, res, next) => {
   if (req.user) {
-    const query = req.query.time;
+    const query = req.params.time;
     pocketClient.getAllStories(req.user.pocketToken, query)
       .then((data) => {
         console.log(data);

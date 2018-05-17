@@ -104,10 +104,12 @@ const getAllStories = (accessToken, time) => {
               if (err) {
                 reject(err);
               } ;
-              let title = response.objects[0].title;
-              let text = response.objects[0].text;
+              const story = {
+                title: response.objects[0].title,
+                text: response.objects[0].text
+              };
               if (response) {
-                resolve(JSON.stringify(response.objects[0]));
+                resolve(story);
               }
               // console.log(data);
             });
