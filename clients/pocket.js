@@ -1,7 +1,7 @@
 const request = require('request');
 const Diffbot = require('diffbot').Diffbot;
 
-const diffbot = new Diffbot('b28b03abe2552b644475048c9cccdf12'); // your API key here
+const diffbot = new Diffbot(process.env.DIFFBOT_CONSUMER_KEY); // your API key here
 
 const formDataToJson = function (formData) {
   const json = {};
@@ -16,10 +16,7 @@ const formDataToJson = function (formData) {
   return json;
 };
 
-// @todo const callbackURL = `${process.env.API_URL}auth/pocket/callback`;
 const callbackURL = process.env.POCKET_CALLBACK_URL;
-// @todo POCKET_CONSUMER_KEY = process.env.POCKET_CONSUMER_KEY,
-const POCKET_CONSUMER_KEY = '77233-bc1d5f96390df6ad14c48477';
 
 const getRequestUrl = () => {
   return new Promise(function (resolve, reject) {
@@ -40,20 +37,6 @@ const getRequestUrl = () => {
         const data = formDataToJson(body);
         const url = `https://getpocket.com/auth/authorize?request_token=${data.code}&redirect_uri=${callbackURL}`;
         resolve(url);
-      }
-    });
-  });
-};
-
-const anotherOne = (user) => {
-  return new Promise(function (resolve, reject) {
-    const options = {};
-    request.post(options, (err, response, body) => {
-      if (err) {
-        reject(err);
-      } else {
-        // resolve(body);
-        // OR resolve(JSON.parse(body); ?
       }
     });
   });
@@ -81,7 +64,7 @@ const getAllStories = (accessToken, time) => {
       },
       'url': 'https://getpocket.com/v3/get',
       'form': {
-        'consumer_key': POCKET_CONSUMER_KEY,
+        'consumer_key': process.env.POCKET_CONSUMER_KEY,
         'access_token': accessToken
       }
     };
@@ -89,7 +72,6 @@ const getAllStories = (accessToken, time) => {
       if (err) {
         reject(err);
       } else {
-        // const data = formDataToJson(body);
         const data = JSON.parse(body);
 
         const listOfArticles = _filter(data.list, time);
@@ -107,11 +89,11 @@ const getAllStories = (accessToken, time) => {
               const story = {
                 title: response.objects[0].title,
                 text: response.objects[0].text
+                // @note Add url to view original on the app
               };
               if (response) {
                 resolve(story);
               }
-              // console.log(data);
             });
           })
           );
@@ -123,10 +105,23 @@ const getAllStories = (accessToken, time) => {
       }
     });
   });
+
+  // const anotherOne = (user) => {
+//   return new Promise(function (resolve, reject) {
+//     const options = {};
+//     request.post(options, (err, response, body) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         // resolve(body);
+//         // OR resolve(JSON.parse(body); ?
+//       }
+//     });
+//   });
+// };
 };
 
 module.exports = {
   getRequestUrl,
-  anotherOne,
   getAllStories
 };
